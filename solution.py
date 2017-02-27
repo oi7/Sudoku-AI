@@ -21,6 +21,7 @@ units = dict((s, [u for u in unitlist if s in u]) for s in boxes)
 peers = dict((s, set(sum(units[s],[]))-set([s])) for s in boxes)
 
 def assign_value(values, box, value):
+    # Update the values dictionary
     values[box] = value
     if len(value) == 1:
         assignments.append(values.copy())
@@ -47,6 +48,7 @@ def naked_twins(values):
     return values
 
 def grid_values(grid):
+    # Convert grid string into {<box>: <value>} dict with '123456789' value for empties
     chars = []
     digits = '123456789'
     for c in grid:
@@ -58,6 +60,7 @@ def grid_values(grid):
     return dict(zip(boxes, chars))
 
 def display(values):
+    # Display the values as a 2-D grid with the input in dictionary form
     width = 1+max(len(values[s]) for s in boxes)
     line = '+'.join(['-'*(width*3)]*3)
     for r in rows:
@@ -67,6 +70,7 @@ def display(values):
     return
 
 def eliminate(values):
+    # Eliminate values from peers of each box with a single value
     solved_values = [box for box in values.keys() if len(values[box]) == 1]
     for box in solved_values:
         digit = values[box]
@@ -75,6 +79,7 @@ def eliminate(values):
     return values
 
 def only_choice(values):
+    # Finalize all values that are the only choice for a unit
     for unit in unitlist:
         for digit in '123456789':
             dplaces = [box for box in unit if digit in values[box]]
@@ -83,20 +88,21 @@ def only_choice(values):
     return values
 
 def reduce_puzzle(values):
+    # Apply all the solution reduction strategies to reduce possible solutions
     stalled = False
     while not stalled:
         # Check how many boxes have a determined value
         solved_values_before = len([box for box in values.keys() if len(values[box]) == 1])
         # Eliminate Strategy
-        values=eliminate(values)
+        values = eliminate(values)
         # Only Choice Strategy
-        values=only_choice(values)
+        values = only_choice(values)
         # Naked Twins Strategy
-        values=naked_twins(values)
+        values = naked_twins(values)
         # Check how many boxes have a determined value
         solved_values_after = len([box for box in values.keys() if len(values[box]) == 1])
         # Stop the program if all boxes are solved
-        stalled=solved_values_after!=27
+        stalled = solved_values_after!=27
         # Stop the loop if no new value was added
         stalled = solved_values_before == solved_values_after
         # Return false if there is a box with no available value
@@ -105,6 +111,7 @@ def reduce_puzzle(values):
     return values
 
 def search(values):
+    # Use depth-first search and propagation to create a search tree and solve the sudoku
     values = reduce_puzzle(values)
     if values is False:
         return False
@@ -121,6 +128,7 @@ def search(values):
             return attempt
 
 def solve(grid):
+    # Find the solution to a sudoku grid
     values = grid_values(grid)
     return (search(values))
 
